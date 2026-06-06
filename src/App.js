@@ -3,17 +3,12 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/common/ProtectedRoute';
-
-// Pages — baad mein banayenge
+import DashboardLayout from './components/layout/DashboardLayout';
+// Auth Pages
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
-
-// Placeholder pages — baad mein replace honge
-const Dashboard = () => (
-  <div className="min-h-screen bg-gray-950 text-white flex items-center justify-center">
-    <h1 className="text-3xl font-bold">Dashboard 🚀</h1>
-  </div>
-);
+// Dashboard Pages
+import Home from './pages/dashboard/Home';
 
 function App() {
   return (
@@ -23,11 +18,7 @@ function App() {
           position="top-right"
           toastOptions={{
             duration: 3000,
-            style: {
-              background: '#1f2937',
-              color: '#fff',
-              border: '1px solid #374151'
-            },
+            style: { background: '#1f2937', color: '#fff', border: '1px solid #374151' },
             success: { iconTheme: { primary: '#10b981', secondary: '#fff' } },
             error: { iconTheme: { primary: '#ef4444', secondary: '#fff' } }
           }}
@@ -37,16 +28,21 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
-          {/* Protected Routes */}
+          {/* Protected Dashboard Routes */}
           <Route path="/dashboard" element={
             <ProtectedRoute>
-              <Dashboard />
+              <DashboardLayout />
             </ProtectedRoute>
-          } />
+          }>
+            <Route index element={<Home />} />
+            {/* Baad mein add honge */}
+            {/* <Route path="profile" element={<Profile />} /> */}
+            {/* <Route path="resume" element={<Resume />} /> */}
+          </Route>
 
-          {/* Default redirect */}
+          {/* Default */}
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </Router>
     </AuthProvider>
