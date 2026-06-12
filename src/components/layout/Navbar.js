@@ -2,6 +2,7 @@ import React from 'react';
 import { RiMenuLine, RiBellLine, RiSearchLine } from 'react-icons/ri';
 import { useAuth } from '../../context/AuthContext';
 
+
 const Navbar = ({ setIsOpen }) => {
   const { user } = useAuth();
 

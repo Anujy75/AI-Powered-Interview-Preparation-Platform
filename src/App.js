@@ -4,11 +4,15 @@ import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import DashboardLayout from './components/layout/DashboardLayout';
+
 // Auth Pages
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
+
 // Dashboard Pages
 import Home from './pages/dashboard/Home';
+import Profile from './pages/dashboard/Profile';
+import Resume from './pages/dashboard/Resume';
 
 function App() {
   return (
@@ -24,26 +28,27 @@ function App() {
           }}
         />
         <Routes>
-          {/* Public Routes */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+  {/* Public Routes */}
+  <Route path="/login" element={<Login />} />
+  <Route path="/register" element={<Register />} />
 
-          {/* Protected Dashboard Routes */}
-          <Route path="/dashboard" element={
-            <ProtectedRoute>
-              <DashboardLayout />
-            </ProtectedRoute>
-          }>
-            <Route index element={<Home />} />
-            {/* Baad mein add honge */}
-            {/* <Route path="profile" element={<Profile />} /> */}
-            {/* <Route path="resume" element={<Resume />} /> */}
-          </Route>
+  {/* Protected Dashboard Routes */}
+  <Route path="/dashboard" element={
+    <ProtectedRoute>
+      <DashboardLayout />
+    </ProtectedRoute>
+  }>
+    <Route index element={<Home />} />
+    <Route path="profile" element={<Profile />} />
+    <Route path="resume" element={<Resume />} />
+  </Route>
 
-          {/* Default */}
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          <Route path="*" element={<Navigate to="/login" replace />} />
-        </Routes>
+  {/* ✅ Default — sirf "/" ko dashboard pe bhejo */}
+  <Route path="/" element={<Navigate to="/dashboard" replace />} />
+  
+  {/* ✅ Unknown routes login pe bhejo, dashboard pe nahi */}
+  <Route path="*" element={<Navigate to="/login" replace />} />
+</Routes>
       </Router>
     </AuthProvider>
   );

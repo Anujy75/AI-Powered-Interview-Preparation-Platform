@@ -23,6 +23,8 @@ const authReducer = (state, action) => {
       return { ...state, loading: false, isAuthenticated: false, user: null, token: null, error: null };
     case 'CLEAR_ERROR':
       return { ...state, error: null };
+    case 'UPDATE_USER':
+      return { ...state, user: action.payload };
     default:
       return state;
   }
@@ -35,36 +37,28 @@ export const AuthProvider = ({ children }) => {
   axios.defaults.baseURL = process.env.REACT_APP_API_URL;
 
   // ─── Token header mein lagao ───────────────────────────────
-  useEffect(() => {
-    if (state.token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${state.token}`;
-    } else {
-      delete axios.defaults.headers.common['Authorization'];
+useEffect(() => {
+  const loadUser = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      dispatch({ type: 'AUTH_FAIL', payload: null });
+      return;
     }
-  }, [state.token]);
-
-  // ─── App load pe user check karo ──────────────────────────
-  useEffect(() => {
-    const loadUser = async () => {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        dispatch({ type: 'AUTH_FAIL', payload: null });
-        return;
-      }
-      try {
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-        const res = await axios.get('/auth/me');
-        dispatch({
-          type: 'AUTH_SUCCESS',
-          payload: { user: res.data.user, token }
-        });
-      } catch (err) {
-        localStorage.removeItem('token');
-        dispatch({ type: 'AUTH_FAIL', payload: null });
-      }
-    };
-    loadUser();
-  }, []);
+    try {
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      const res = await axios.get('/auth/me');
+      dispatch({
+        type: 'AUTH_SUCCESS',
+        payload: { user: res.data.user, token }
+      });
+    } catch (err) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken'); // ← ye add karo
+      dispatch({ type: 'AUTH_FAIL', payload: null });
+    }
+  };
+  loadUser();
+}, []);
 
   // ─── Register ─────────────────────────────────────────────
   const register = async (userData) => {
@@ -97,14 +91,26 @@ export const AuthProvider = ({ children }) => {
   };
 
   // ─── Logout ───────────────────────────────────────────────
-  const logout = async () => {
-    try {
-      await axios.get('/auth/logout');
-    } catch (err) {
-      console.error(err);
-    }
-    localStorage.removeItem('token');
-    dispatch({ type: 'LOGOUT' });
+const logout = async () => {
+  // ✅ Pehle localStorage clear karo
+  localStorage.removeItem('token');
+  localStorage.removeItem('refreshToken');
+  delete axios.defaults.headers.common['Authorization'];
+  
+  // Phir dispatch karo
+  dispatch({ type: 'LOGOUT' });
+  
+  // Phir API call karo (background mein)
+  try {
+    await axios.get('/auth/logout');
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+  // ─── Update User ───────────────────────────────────────────
+  const updateUser = (userData) => {
+    dispatch({ type: 'UPDATE_USER', payload: userData });
   };
 
   // ─── Clear Error ──────────────────────────────────────────
@@ -116,7 +122,8 @@ export const AuthProvider = ({ children }) => {
       register,
       login,
       logout,
-      clearError
+      clearError,
+      updateUser
     }}>
       {children}
     </AuthContext.Provider>

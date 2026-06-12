@@ -22,10 +22,17 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
   const { logout, user } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogout = async () => {
-    await logout();
-    navigate('/login');
-  };
+const handleLogout = async () => {
+  // Pehle localStorage clear karo
+  localStorage.removeItem('token');
+  localStorage.removeItem('refreshToken');
+  
+  // Phir logout call karo
+  await logout();
+  
+  // Force navigate
+  window.location.href = '/login';
+};
 
   return (
     <>
